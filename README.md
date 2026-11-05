@@ -86,7 +86,7 @@ interface:
 ## Development
 
 The tests run against a simulated clock (`tests/conftest.py`) that speaks the real HTTP
-protocol. Requires Python ≥ 3.13.
+protocol. Requires Python ≥ 3.14.
 
 ```bash
 python3 -m venv .venv
