@@ -1,0 +1,46 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "ntp_synchronized": {
+        "default": "mdi:sync-alert",
+        "state": { "on": "mdi:sync" }
+      }
+    },
+    "button": {
+      "stopwatch_start_up": { "default": "mdi:timer-play-outline" },
+      "stopwatch_start_down": { "default": "mdi:timer-sand" },
+      "stopwatch_pause": { "default": "mdi:timer-pause-outline" },
+      "stopwatch_resume": { "default": "mdi:timer-play" },
+      "stopwatch_reset": { "default": "mdi:timer-refresh-outline" },
+      "stopwatch_display": { "default": "mdi:eye" },
+      "stopwatch_mask": { "default": "mdi:eye-off" }
+    },
+    "light": {
+      "display": { "default": "mdi:clock-digital" }
+    },
+    "number": {
+      "time_alternation": { "default": "mdi:clock-outline" },
+      "date_alternation": { "default": "mdi:calendar" },
+      "stopwatch_preset": { "default": "mdi:timer-cog-outline" }
+    },
+    "select": {
+      "digit_color": { "default": "mdi:palette" },
+      "dot_mode": { "default": "mdi:dots-vertical" },
+      "dot_light": { "default": "mdi:dots-vertical" }
+    },
+    "sensor": {
+      "ntp_server": { "default": "mdi:server-network" },
+      "stopwatch_state": {
+        "default": "mdi:timer-outline",
+        "state": {
+          "paused": "mdi:timer-pause-outline",
+          "counting_up": "mdi:timer-play-outline",
+          "counting_down": "mdi:timer-sand"
+        }
+      }
+    },
+    "switch": {
+      "brightness_override": { "default": "mdi:brightness-7" }
+    }
+  }
+}

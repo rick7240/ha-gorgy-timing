@@ -1,0 +1,117 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Gorgy Timing Uhr",
+        "description": "Adresse und Passwort des Webinterfaces der Uhr. Der Benutzer ist immer `admin`.",
+        "data": {
+          "host": "Host",
+          "password": "Passwort"
+        },
+        "data_description": {
+          "host": "IP-Adresse oder Hostname der Uhr, z. B. 192.168.1.20",
+          "password": "Passwort des Webinterfaces"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Neues Passwort",
+        "description": "Die Uhr unter {host} akzeptiert das gespeicherte Passwort nicht mehr.",
+        "data": {
+          "password": "Passwort"
+        }
+      },
+      "reconfigure": {
+        "title": "Verbindung ändern",
+        "data": {
+          "host": "Host",
+          "password": "Passwort"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Die Uhr ist unter dieser Adresse nicht erreichbar.",
+      "invalid_auth": "Die Uhr hat das Passwort abgelehnt.",
+      "unsupported_password": "Der Login der Uhr kann keine Passwörter mit „/“ oder „=“ verarbeiten. Bitte das Passwort an der Uhr ändern.",
+      "unknown": "Unerwarteter Fehler, siehe Log."
+    },
+    "abort": {
+      "already_configured": "Diese Uhr ist bereits eingerichtet.",
+      "reauth_successful": "Das neue Passwort wurde gespeichert.",
+      "reconfigure_successful": "Die Verbindung wurde aktualisiert.",
+      "wrong_device": "Das ist eine andere Uhr (Seriennummer passt nicht)."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "ntp_synchronized": { "name": "NTP-synchronisiert" }
+    },
+    "button": {
+      "stopwatch_start_up": { "name": "Stoppuhr hochzählen" },
+      "stopwatch_start_down": { "name": "Stoppuhr runterzählen" },
+      "stopwatch_pause": { "name": "Stoppuhr pausieren" },
+      "stopwatch_resume": { "name": "Stoppuhr fortsetzen" },
+      "stopwatch_reset": { "name": "Stoppuhr zurücksetzen" },
+      "stopwatch_display": { "name": "Stoppuhr auf der Uhr anzeigen" },
+      "stopwatch_mask": { "name": "Stoppuhr auf der Uhr ausblenden" }
+    },
+    "light": {
+      "display": { "name": "Display" }
+    },
+    "number": {
+      "time_alternation": { "name": "Anzeigedauer Uhrzeit" },
+      "date_alternation": { "name": "Anzeigedauer Datum" },
+      "stopwatch_preset": { "name": "Stoppuhr-Startwert" }
+    },
+    "select": {
+      "digit_color": {
+        "name": "Ziffernfarbe",
+        "state": {
+          "red": "Rot",
+          "amber": "Bernstein",
+          "green": "Grün",
+          "white": "Weiß",
+          "cyan": "Cyan",
+          "blue": "Blau"
+        }
+      },
+      "dot_mode": {
+        "name": "Doppelpunkt",
+        "state": {
+          "blinking": "Blinkend",
+          "fixed": "Fest"
+        }
+      },
+      "dot_light": {
+        "name": "Doppelpunkt leuchtet",
+        "state": {
+          "when_synchronized": "Wenn synchronisiert",
+          "when_not_synchronized": "Wenn nicht synchronisiert",
+          "always": "Immer"
+        }
+      }
+    },
+    "sensor": {
+      "ntp_server": { "name": "NTP-Server" },
+      "stopwatch_state": {
+        "name": "Stoppuhr",
+        "state": {
+          "stopped": "Gestoppt",
+          "paused": "Pausiert",
+          "counting_up": "Zählt hoch",
+          "counting_down": "Zählt runter"
+        }
+      }
+    },
+    "switch": {
+      "brightness_override": { "name": "Maximalhelligkeit überschreiten" }
+    }
+  },
+  "exceptions": {
+    "invalid_auth": { "message": "Die Uhr hat das Passwort abgelehnt." },
+    "update_failed": { "message": "Die Uhr kann nicht gelesen werden: {error}" },
+    "communication_error": { "message": "Die Uhr hat den Befehl nicht angenommen: {error}" },
+    "invalid_value": { "message": "Ungültiger Wert: {error}" },
+    "not_possible_now": { "message": "Gerade nicht möglich: {error}" },
+    "time_and_date_hidden": { "message": "Uhrzeit und Datum können nicht beide ausgeblendet sein (0 s)." }
+  }
+}

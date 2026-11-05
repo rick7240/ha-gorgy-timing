@@ -1,0 +1,117 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Gorgy Timing clock",
+        "description": "Address and password of the clock's web interface. The user is always `admin`.",
+        "data": {
+          "host": "Host",
+          "password": "Password"
+        },
+        "data_description": {
+          "host": "IP address or host name of the clock, e.g. 192.168.1.20",
+          "password": "Password of the web interface"
+        }
+      },
+      "reauth_confirm": {
+        "title": "New password",
+        "description": "The clock at {host} no longer accepts the stored password.",
+        "data": {
+          "password": "Password"
+        }
+      },
+      "reconfigure": {
+        "title": "Change connection",
+        "data": {
+          "host": "Host",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "The clock is not reachable at this address.",
+      "invalid_auth": "The clock rejected the password.",
+      "unsupported_password": "The clock's login cannot handle passwords containing \"/\" or \"=\". Please change the password on the clock.",
+      "unknown": "Unexpected error, see the log."
+    },
+    "abort": {
+      "already_configured": "This clock is already set up.",
+      "reauth_successful": "The new password has been saved.",
+      "reconfigure_successful": "The connection has been updated.",
+      "wrong_device": "This is a different clock (serial number does not match)."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "ntp_synchronized": { "name": "NTP synchronized" }
+    },
+    "button": {
+      "stopwatch_start_up": { "name": "Stopwatch count up" },
+      "stopwatch_start_down": { "name": "Stopwatch count down" },
+      "stopwatch_pause": { "name": "Stopwatch pause" },
+      "stopwatch_resume": { "name": "Stopwatch resume" },
+      "stopwatch_reset": { "name": "Stopwatch reset" },
+      "stopwatch_display": { "name": "Show stopwatch on clock" },
+      "stopwatch_mask": { "name": "Hide stopwatch on clock" }
+    },
+    "light": {
+      "display": { "name": "Display" }
+    },
+    "number": {
+      "time_alternation": { "name": "Time display duration" },
+      "date_alternation": { "name": "Date display duration" },
+      "stopwatch_preset": { "name": "Stopwatch start value" }
+    },
+    "select": {
+      "digit_color": {
+        "name": "Digit color",
+        "state": {
+          "red": "Red",
+          "amber": "Amber",
+          "green": "Green",
+          "white": "White",
+          "cyan": "Cyan",
+          "blue": "Blue"
+        }
+      },
+      "dot_mode": {
+        "name": "Colon",
+        "state": {
+          "blinking": "Blinking",
+          "fixed": "Fixed"
+        }
+      },
+      "dot_light": {
+        "name": "Colon lights up",
+        "state": {
+          "when_synchronized": "When synchronized",
+          "when_not_synchronized": "When not synchronized",
+          "always": "Always"
+        }
+      }
+    },
+    "sensor": {
+      "ntp_server": { "name": "NTP server" },
+      "stopwatch_state": {
+        "name": "Stopwatch",
+        "state": {
+          "stopped": "Stopped",
+          "paused": "Paused",
+          "counting_up": "Counting up",
+          "counting_down": "Counting down"
+        }
+      }
+    },
+    "switch": {
+      "brightness_override": { "name": "Override maximum brightness" }
+    }
+  },
+  "exceptions": {
+    "invalid_auth": { "message": "The clock rejected the password." },
+    "update_failed": { "message": "Cannot read from the clock: {error}" },
+    "communication_error": { "message": "The clock did not accept the command: {error}" },
+    "invalid_value": { "message": "Invalid value: {error}" },
+    "not_possible_now": { "message": "Not possible right now: {error}" },
+    "time_and_date_hidden": { "message": "Time and date cannot both be hidden (0 s)." }
+  }
+}
