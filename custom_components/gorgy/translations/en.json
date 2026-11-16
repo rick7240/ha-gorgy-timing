@@ -110,6 +110,7 @@
     "invalid_auth": { "message": "The clock rejected the password." },
     "update_failed": { "message": "Cannot read from the clock: {error}" },
     "communication_error": { "message": "The clock did not accept the command: {error}" },
+    "incomplete_settings": { "message": "The clock returned incomplete settings, so nothing was changed. Please try again. ({error})" },
     "invalid_value": { "message": "Invalid value: {error}" },
     "not_possible_now": { "message": "Not possible right now: {error}" },
     "time_and_date_hidden": { "message": "Time and date cannot both be hidden (0 s)." }

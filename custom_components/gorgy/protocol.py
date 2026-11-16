@@ -23,6 +23,14 @@ class GorgyValidationError(ValueError):
     """A value is not accepted by the clock."""
 
 
+class IncompleteSettingsError(ValueError):
+    """The clock returned an incomplete set of display settings.
+
+    The clock only accepts the full set, so writing it back would have to
+    invent the missing values (e.g. the time zone). Nothing must be written.
+    """
+
+
 def parse_key_values(text: str) -> RawSettings:
     """Parse ``key=value/key=value/`` responses.
 
@@ -58,8 +66,9 @@ DOT_MODES = ("blinking", "fixed")
 DOT_LIGHT = ("when-synchronized", "when-not-synchronized", "always")
 DST_POLICIES = {"0": "none", "1": "europe", "2": "us-canada", "5": "manual"}
 
-# Calendar fields are only returned by models with a calendar display. The
-# browser then submits the form defaults, so we do the same.
+# Calendar fields are only returned by models with a calendar display. For
+# models without one the browser submits the form defaults, so we do the same.
+# If only some of them are present, the answer is incomplete.
 CALENDAR_DEFAULTS = {
     "monthAlternationDuration": "10",
     "yearAlternationDuration": "5",
@@ -90,24 +99,48 @@ def palette(raw: RawSettings) -> tuple[str, ...]:
     return COLORS_BLUE_WHITE if raw.get("bleublanc") == "1" else COLORS
 
 
-def utc_offset_quarters(raw: RawSettings) -> int:
-    """UTC offset in quarter hours, computed exactly like onApplyClicked() in display.html."""
-    hours = _to_int(raw.get("offsethour")) or 0
-    quarters = _to_int(raw.get("offsetminute")) or 0
+def utc_offset_quarters(raw: RawSettings) -> int | None:
+    """UTC offset in quarter hours, computed exactly like onApplyClicked() in display.html.
+
+    None if the clock did not report it.
+    """
+    hours = _to_int(raw.get("offsethour"))
+    quarters = _to_int(raw.get("offsetminute"))
+    if hours is None or quarters is None:
+        return None
     return hours * 4 + (-abs(quarters) if hours < 0 else quarters)
 
 
+def _calendar_settings(raw: RawSettings) -> RawSettings:
+    """Calendar fields to send: the clock's own, or the form defaults if it has none."""
+    present = [key for key in CALENDAR_DEFAULTS if key in raw]
+    if not present:
+        return dict(CALENDAR_DEFAULTS)
+    if missing := [key for key in CALENDAR_DEFAULTS if key not in raw]:
+        raise IncompleteSettingsError(f"Calendar settings incomplete, missing: {', '.join(missing)}")
+    return {key: raw[key] for key in CALENDAR_DEFAULTS}
+
+
+# Payload fields that are computed from differently named getdata keys
+_SOURCE_KEYS = {"offset": "offsethour/offsetminute"}
+
+
 def build_display_payload(raw: RawSettings) -> str:
-    """Build the POST body for /display/setdata from raw settings (as returned by getdata)."""
-    s: dict[str, Any] = {**CALENDAR_DEFAULTS, **raw}
+    """Build the POST body for /display/setdata from raw settings (as returned by getdata).
+
+    Raises IncompleteSettingsError instead of filling in values the clock did not report.
+    """
+    s: dict[str, Any] = {**raw, **_calendar_settings(raw)}
     manual_dst = str(s.get("dstPolicy")) == "5"
 
-    def dst(value: Any) -> str:
+    def dst(value: Any) -> str | None:
         if not manual_dst:
             return "0/0/0/0"
-        if value is None:
-            return ""
-        return "/".join(value) if isinstance(value, list) else str(value)
+        # manual dates are MM/DD/hh/mm; anything else means the answer was cut short
+        parts = value if isinstance(value, list) else []
+        if len(parts) != 4 or not all(parts):
+            return None
+        return "/".join(parts)
 
     fields: list[tuple[str, Any]] = [
         ("index", "1"),
@@ -133,9 +166,9 @@ def build_display_payload(raw: RawSettings) -> str:
         ("brightnessoverride", s.get("brightnessoverride")),
     ]
 
-    if missing := [key for key, value in fields if value is None]:
+    if missing := [_SOURCE_KEYS.get(key, key) for key, value in fields if value is None]:
         # Never send incomplete settings - the clock would overwrite real ones.
-        raise ValueError(f"Display settings incomplete, missing: {', '.join(missing)}")
+        raise IncompleteSettingsError(f"Display settings incomplete, missing: {', '.join(missing)}")
     return "display/" + "/".join(f"{key}={_format(value)}" for key, value in fields)
 
 
@@ -154,7 +187,7 @@ class DisplayState:
     temperature_alternation: int
     dot_mode: str
     dot_light: str
-    utc_offset_minutes: int
+    utc_offset_minutes: int | None
     dst_policy: str
 
 
@@ -180,7 +213,7 @@ def describe_display(raw: RawSettings) -> DisplayState:
         temperature_alternation=_to_int(raw.get("tempAlternationDuration")) or 0,
         dot_mode=_name_at(DOT_MODES, raw.get("syncdots"), _format(raw.get("syncdots"))),
         dot_light=_name_at(DOT_LIGHT, raw.get("behavdots"), _format(raw.get("behavdots"))),
-        utc_offset_minutes=utc_offset_quarters(raw) * 15,
+        utc_offset_minutes=None if (quarters := utc_offset_quarters(raw)) is None else quarters * 15,
         dst_policy=DST_POLICIES.get(_format(raw.get("dstPolicy")), _format(raw.get("dstPolicy"))),
     )
 

@@ -12,6 +12,7 @@ import aiohttp
 
 from .protocol import (
     DisplayState,
+    IncompleteSettingsError,
     RawSettings,
     StopwatchState,
     apply_display_changes,
@@ -45,6 +46,10 @@ class GorgyAuthError(GorgyError):
 
 class GorgyStateError(GorgyError):
     """The action is not possible in the clock's current state."""
+
+
+class GorgyIncompleteError(GorgyError):
+    """The clock returned incomplete settings, so nothing was written."""
 
 
 def create_session() -> aiohttp.ClientSession:
@@ -258,7 +263,11 @@ class GorgyClient:
     async def _write_display(self, current: RawSettings, changes: dict[str, Any]) -> DisplayState:
         """The clock only accepts the complete set: read -> modify -> write. Call with the lock held."""
         updated = apply_display_changes(current, changes)
-        result = await self._authed("/display/setdata", method="POST", data=build_display_payload(updated))
+        try:
+            payload = build_display_payload(updated)
+        except IncompleteSettingsError as err:
+            raise GorgyIncompleteError(str(err)) from err
+        result = await self._authed("/display/setdata", method="POST", data=payload)
         if result != "Success":
             raise GorgyError(f"Clock rejected display settings: {result.strip()[:200]}")
         return describe_display(await self._read_display())

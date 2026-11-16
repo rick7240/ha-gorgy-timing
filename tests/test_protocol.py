@@ -4,6 +4,7 @@ import pytest
 
 from custom_components.gorgy.protocol import (
     GorgyValidationError,
+    IncompleteSettingsError,
     apply_display_changes,
     build_display_payload,
     build_stopwatch_action_form,
@@ -53,7 +54,56 @@ def test_utc_offset_in_quarter_hours() -> None:
 def test_refuses_incomplete_payload() -> None:
     raw = parse_key_values(DISPLAY_GETDATA)
     del raw["syncdots"]
-    with pytest.raises(ValueError, match="missing: syncdots"):
+    with pytest.raises(IncompleteSettingsError, match="missing: syncdots"):
+        build_display_payload(raw)
+
+
+@pytest.mark.parametrize("key", ["offsethour", "offsetminute"])
+def test_refuses_payload_without_utc_offset(key: str) -> None:
+    """A missing offset must not turn into offset=0, which sets the clock to UTC."""
+    raw = parse_key_values(DISPLAY_GETDATA)
+    del raw[key]
+    with pytest.raises(IncompleteSettingsError, match="missing: offsethour/offsetminute"):
+        build_display_payload(raw)
+    assert describe_display(raw).utc_offset_minutes is None
+
+
+@pytest.mark.parametrize("dst_begin", [None, "", ["03", "31"], ["03", "31", "", "00"]])
+def test_refuses_manual_dst_without_complete_dates(dst_begin: str | list[str] | None) -> None:
+    raw = {**parse_key_values(DISPLAY_GETDATA), "dstPolicy": "5", "dstEnd": ["10", "27", "01", "00"]}
+    if dst_begin is None:
+        del raw["dstBegin"]
+    else:
+        raw["dstBegin"] = dst_begin
+    with pytest.raises(IncompleteSettingsError, match="missing: dstBegin$"):
+        build_display_payload(raw)
+
+
+def test_other_dst_policies_need_no_dates() -> None:
+    raw = parse_key_values(DISPLAY_GETDATA)
+    del raw["dstBegin"], raw["dstEnd"]
+    assert "/dstBegin=0/0/0/0/dstEnd=0/0/0/0/" in build_display_payload(raw)
+
+
+CALENDAR = {
+    "monthAlternationDuration": "8",
+    "yearAlternationDuration": "3",
+    "daycolor": "1",
+    "monthcolor": "2",
+    "calbrightness": "4",
+}
+
+
+def test_calendar_fields_of_the_clock_are_kept() -> None:
+    payload = build_display_payload({**parse_key_values(DISPLAY_GETDATA), **CALENDAR})
+    assert "/monthAlternationDuration=8/yearAlternationDuration=3/daycolor=1/monthcolor=2/calbrightness=4/" in payload
+
+
+def test_refuses_partial_calendar_fields() -> None:
+    """Defaults are only for models without a calendar display, not for gaps."""
+    raw = {**parse_key_values(DISPLAY_GETDATA), **CALENDAR}
+    del raw["daycolor"]
+    with pytest.raises(IncompleteSettingsError, match="Calendar settings incomplete, missing: daycolor"):
         build_display_payload(raw)
 
 

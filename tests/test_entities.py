@@ -11,7 +11,7 @@ from homeassistant.components.light import ATTR_BRIGHTNESS
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import ATTR_ENTITY_ID, STATE_OFF, STATE_ON, STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ServiceValidationError
+from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.util.color import value_to_brightness
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -97,6 +97,16 @@ async def test_full_brightness_respects_recommended_maximum(hass: HomeAssistant,
 async def test_lowest_brightness_keeps_display_on(hass: HomeAssistant, fake_clock: FakeClock) -> None:
     await _call(hass, "light", "turn_on", LIGHT, brightness=1)
     assert fake_clock.display["brightness"] == "1"
+
+
+async def test_incomplete_answer_writes_nothing(hass: HomeAssistant, fake_clock: FakeClock) -> None:
+    """A partial answer from the clock must not be written back with invented values."""
+    del fake_clock.display["offsethour"]
+    with pytest.raises(HomeAssistantError) as err:
+        await _call(hass, "light", "turn_on", LIGHT, brightness=255)
+    assert err.value.translation_key == "incomplete_settings"
+    assert fake_clock.display_posts == []
+    assert fake_clock.display["brightness"] == "5"
 
 
 async def test_select_color_and_colon(hass: HomeAssistant, fake_clock: FakeClock) -> None:

@@ -13,10 +13,13 @@ with the same web interface probably work too. Feedback is welcome as an
 
 **With HACS**
 
-1. *HACS → ⋮ → Custom repositories*: enter `https://github.com/rick7240/ha-gorgy-timing`
-   as the URL and choose the type "Integration".
-2. Search for "Gorgy Timing" and download it.
-3. Restart Home Assistant.
+1. In HACS, search for "Gorgy Timing" and download it.
+2. Restart Home Assistant.
+
+If the search does not find it (for example before it is part of the HACS default
+list), add it as a custom repository first: *HACS → ⋮ → Custom repositories*, enter
+`https://github.com/rick7240/ha-gorgy-timing` as the URL and choose the type
+"Integration".
 
 **Manually**
 
@@ -72,7 +75,9 @@ interface:
 - **Display:** `GET /display/getdata`, `POST /display/setdata`. The clock always expects
   the complete set in the format `key=value/key=value/…`. The integration therefore
   reads first, changes individual fields and writes everything back, byte-identical to
-  the web interface.
+  the web interface. If that read comes back incomplete (for example without the time
+  zone), the integration writes nothing and reports an error instead of filling in
+  values.
 - **Stopwatch:** `GET /chrono/getdata` is position-based (`\/` is an escaped slash). The
   buttons are form POSTs to `/chrono/<action>`. Which action a button triggers depends
   on the state, so the integration only runs an action if the clock offers it at that

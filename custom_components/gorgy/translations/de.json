@@ -110,6 +110,7 @@
     "invalid_auth": { "message": "Die Uhr hat das Passwort abgelehnt." },
     "update_failed": { "message": "Die Uhr kann nicht gelesen werden: {error}" },
     "communication_error": { "message": "Die Uhr hat den Befehl nicht angenommen: {error}" },
+    "incomplete_settings": { "message": "Die Uhr hat unvollständige Einstellungen geliefert, deshalb wurde nichts geändert. Bitte erneut versuchen. ({error})" },
     "invalid_value": { "message": "Ungültiger Wert: {error}" },
     "not_possible_now": { "message": "Gerade nicht möglich: {error}" },
     "time_and_date_hidden": { "message": "Uhrzeit und Datum können nicht beide ausgeblendet sein (0 s)." }

@@ -17,7 +17,7 @@ from homeassistant.exceptions import (
 from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .api import DeviceStatus, GorgyAuthError, GorgyClient, GorgyError, GorgyStateError
+from .api import DeviceStatus, GorgyAuthError, GorgyClient, GorgyError, GorgyIncompleteError, GorgyStateError
 from .const import DOMAIN, FEATURE_STOPWATCH, SCAN_INTERVAL, STORAGE_VERSION
 from .protocol import DisplayState, GorgyValidationError, StopwatchState
 
@@ -109,6 +109,12 @@ class GorgyCoordinator(DataUpdateCoordinator[GorgyData]):
             raise ServiceValidationError(
                 translation_domain=DOMAIN,
                 translation_key="not_possible_now",
+                translation_placeholders={"error": str(err)},
+            ) from err
+        except GorgyIncompleteError as err:
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="incomplete_settings",
                 translation_placeholders={"error": str(err)},
             ) from err
         except GorgyAuthError as err:
